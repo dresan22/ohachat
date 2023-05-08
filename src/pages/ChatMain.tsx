@@ -1,8 +1,10 @@
 import { ChatCard } from "../components/ChatCard";
 import { Messages } from "../components/Messages";
 import { Welcome } from "../components/Welcome";
+import { useUserStore } from "../store/store";
 
 export default function Chat() {
+  const user = useUserStore((state) => state.user);
   return (
     <div className="n grid h-screen place-content-center bg-oha-pattern bg-cover bg-center text-[#0078A7]">
       <div className="flex h-[80vh] min-w-[80vw] overflow-hidden rounded-2xl bg-white shadow-lg">

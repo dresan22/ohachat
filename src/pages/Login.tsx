@@ -1,11 +1,49 @@
+import { useState } from "react";
 import logo from "../assets/oha-icon.png";
 import loginImage from "../assets/oha-login.png";
-import { Footer } from "../components/Footers";
+import { Footer } from "../components/Footer";
+import axios, { AxiosResponse } from "axios";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useUserStore } from "../store/store";
+import { UserResponse } from "../types";
 
 export function Login() {
+  const navigate = useNavigate();
+  const setUser = useUserStore((state) => state.setUser);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchData = async (url: string, options: any) => {
+    setIsLoading(true);
+    try {
+      const response: AxiosResponse<UserResponse> = await axios(url, options);
+      setUser(response.data.user);
+    } catch (error) {
+      setError(error as any);
+    }
+    setIsLoading(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    fetchData("https://api.chat.oha.services/api/v1/token/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify({
+        email: e.currentTarget.email.value,
+        password: e.currentTarget.password.value,
+      }),
+    }).then(() => {
+      navigate("/chat");
+    });
+  };
+
   return (
     <div className="grid h-screen place-content-center bg-slate-500">
-      <div className=" overflow-hidde grid h-[80vh]  max-w-[80vw] grid-cols-2 rounded-2xl bg-slate-50">
+      <div className=" grid h-[80vh] max-w-[80vw]  grid-cols-2 overflow-hidden rounded-2xl bg-slate-50">
         <div className="relative grid  place-content-center text-slate-800">
           <div className="absolute left-9 top-9">
             <img src={logo} alt="logo" className="w-20" />
@@ -16,7 +54,7 @@ export function Login() {
             </h2>
             <h1 className="mt-2 text-4xl font-bold">Login</h1>
           </header>
-          <form className="mt-3 space-y-6">
+          <form className="mt-3 space-y-6" onSubmit={handleSubmit}>
             <div className="-space-y-px rounded-md shadow-sm">
               <div>
                 <label htmlFor="email-address" className="sr-only">
@@ -65,12 +103,12 @@ export function Login() {
                 <div className=" mt-4 flex items-center   ">
                   <p className="mt-2  text-sm text-slate-800">
                     No tienes una cuenta?
-                    <a
-                      href="#"
+                    <Link
+                      to="/register"
                       className="ml-2 font-medium text-[#0078A7] hover:text-[#0ebbff]"
                     >
                       Regístrate
-                    </a>
+                    </Link>
                   </p>
                 </div>
               </div>

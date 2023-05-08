@@ -1,6 +1,11 @@
 import EmojiPicker from "emoji-picker-react";
+import { useUserStore } from "../store/store";
 
 export function Messages() {
+  const user = useUserStore((state) => state.user);
+
+  console.log(user);
+
   return (
     <>
       <div className="flex w-full flex-col justify-between ">
@@ -21,7 +26,7 @@ export function Messages() {
               />
             </svg>
             <div className="ml-3 flex flex-col">
-              Jane Cooper
+              {user?.first_name}
               <span className="text-xs text-gray-500"> Online</span>
             </div>
           </div>
