@@ -1,6 +1,14 @@
-export function ChatCard() {
+import { useChatStore } from "../store/store";
+import { User } from "../types/users";
+
+export function ProfileChatCard({ user }: { user: User }) {
+  const setChatPartner = useChatStore((state) => state.setChatPartner);
+  const handleClick = () => {
+    console.log("clicked");
+    setChatPartner(user);
+  };
   return (
-    <div className=" grid grid-cols-1">
+    <button className=" grid grid-cols-1 " onClick={handleClick}>
       <div className="my-2 flex items-center ">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -17,15 +25,17 @@ export function ChatCard() {
           />
         </svg>
         <div className="ml-3 ">
-          <p className="text-sm font-bold  text-gray-900">Tom Cook</p>
+          <p className="text-sm font-bold  text-gray-900">
+            {user.first_name} {user.last_name}
+          </p>
           <div className="flex  text-sm text-gray-500">
-            <span>jane@email.com</span>
+            <span>{user.email}</span>
           </div>
         </div>
         <time className="ml-auto flex  text-sm text-gray-500">
           <span>12:00</span>
         </time>
       </div>
-    </div>
+    </button>
   );
 }

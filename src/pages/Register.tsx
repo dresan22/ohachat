@@ -6,6 +6,7 @@ import { useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/store";
+import { UserResponse } from "../types";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -37,8 +38,8 @@ export default function Register() {
   const fetchData = async (url: string, options: any) => {
     setIsLoading(true);
     try {
-      const response: AxiosResponse<any> = await axios(url, options);
-      setData(response.data);
+      const response: AxiosResponse<UserResponse> = await axios(url, options);
+      setUser(response.data.user);
     } catch (error) {
       setError(error as any);
     }
@@ -47,9 +48,9 @@ export default function Register() {
 
   return (
     <div className="grid h-screen place-content-center bg-slate-500">
-      <div className=" overflow-hidde grid h-[80vh]  max-w-[80vw] grid-cols-2 rounded-2xl bg-slate-50">
-        <div className="relative grid  place-content-center text-slate-800">
-          <div className="absolute left-9 top-9">
+      <div className=" grid grid-cols-1 overflow-hidden rounded-2xl  bg-slate-50  shadow-lg md:grid-cols-2 lg:h-[80vh] lg:max-w-[80vw]">
+        <div className="relative my-4  grid place-content-center  text-slate-800 ">
+          <div className="absolute left-9 top-9 hidden md:block">
             <img src={logo} alt="logo" className="w-20" />
           </div>
           <header>
@@ -59,7 +60,7 @@ export default function Register() {
             <h1 className="mt-2 text-4xl font-bold">Registrate</h1>
           </header>
           <form className="mt-3 space-y-6" onSubmit={handleSubmit}>
-            <div className="-space-y-px rounded-md shadow-sm">
+            <div className="-space-y-px rounded-md ">
               <div>
                 <label htmlFor="name" className="sr-only">
                   Nombre
@@ -145,8 +146,13 @@ export default function Register() {
           </form>
           <Footer />
         </div>
-        <div className="">
-          <img src={loginImage} alt="login" className="h-full w-full" />
+        <div className="  overflow-hidden rounded-2xl ">
+          <img
+            src={loginImage}
+            alt="oha-login"
+            className=" h-[40vh] w-screen object-cover object-center sm:w-[80vw] md:h-full lg:h-full   lg:w-full	
+          "
+          />
         </div>
       </div>
     </div>

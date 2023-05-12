@@ -2,7 +2,7 @@ export function Footer() {
   return (
     <footer
       className="
-              absolute bottom-4  right-4
+              absolute bottom-4  right-4  hidden md:block
             "
     >
       <p className="mt-2 text-sm text-slate-800">
