@@ -1,12 +1,10 @@
-import { useChatStore, useUserStore } from "../store/store";
-import { useNavigate } from "react-router-dom";
-import ChatBubble from "./ChatBubble";
-
 import { useEffect, useRef, useState } from "react";
-import useWebSocket from "react-use-websocket";
-import { set } from "react-hook-form";
+import ChatBubble from "./ChatBubble";
+import { useNavigate } from "react-router-dom";
 import useAxios from "../utils/client";
+import useWebSocket from "react-use-websocket";
 import { AxiosRequestConfig } from "axios";
+import { useChatStore, useUserStore } from "../store/store";
 
 export function ChatRoom() {
   const navigate = useNavigate();
@@ -14,37 +12,41 @@ export function ChatRoom() {
   const chatPartner = useChatStore((state) => state.chatPartner);
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
-  const onlineUsers = useUserStore((state) => state.onlineUsers);
-  const setOnlineUsers = useUserStore((state) => state.setOnlineUsers);
   const token = useUserStore((state) => state.token);
-  const [messages, setMessages] = useState<any[]>([]);
-  const [messageHistory, setMessageHistory] = useState([]);
+  const [textMessage, setTextMessage] = useState<any[]>([]);
+  const messages = useChatStore((state) => state.messages);
+  const setMessages = useChatStore((state) => state.setMessages);
 
-  const BACKEND_WS_BASE = "wss://api.chat.oha.services";
+  const handleSendMessage = async () => {
+    sendData();
+  };
 
-  useWebSocket(
-    `${BACKEND_WS_BASE}/ws/v1/users/${user?.uuid}/notifications/?token=${token}`,
-    {
-      onOpen: () => {
-        console.log("opened");
-      },
-      shouldReconnect: (closeEvent) => true,
-      onMessage: (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === "user-presence") {
-          // setOnlineUsers(response?.data.results);
-        } else if (data.type === "message") {
-          console.log("loggin message");
-        }
-      },
-      onError: (event) => console.log(event),
+  const sendMessageParams: AxiosRequestConfig = {
+    url: `/api/v1/users/${chatPartner?.uuid}/send-message/`,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    data: {
+      content: textMessage,
+    },
+  };
+
+  const { response, sendData, error } = useAxios(sendMessageParams);
+
+  useEffect(() => {
+    const messagesArray = [
+      ...messages,
+      { content: response?.data.content, sender: response?.data.sender },
+    ];
+    if (response?.status === 201) {
+      setMessages([
+        ...messages,
+        { content: response.data.content, sender: response.data.sender },
+      ]);
     }
-  );
-
-  function handleSendMessage() {
-    // sendMessage(messages as any);
-    setMessages([]);
-  }
+  }, [response]);
 
   return (
     <>
@@ -69,57 +71,47 @@ export function ChatRoom() {
               {chatPartner?.first_name} {chatPartner?.last_name}
               <span className="text-xs text-gray-500"> Online</span>
             </div>
-            <nav className="ml-auto">
-              <button
-                onClick={() => {
-                  setUser(undefined);
-                  navigate("/");
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="h-6 w-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-                  />
-                </svg>
-              </button>
-            </nav>
+            <nav className="ml-auto"></nav>
           </div>
         </section>
 
         <section className="h-full overflow-auto bg-gradient-to-b from-[#0078A7] p-2 text-black">
-          {messageHistory.map((message, i) => (
-            <ChatBubble
-              text={message}
-              isSentByCurrentUser
-              key={i}
-              // isSentByCurrentUser={message?.sender === user?.uuid}
-            />
-          ))}
+          {messages.map((message: any, i: any) => {
+            return (
+              <ChatBubble
+                message={message}
+                isSentByCurrentUser={message?.sender.uuid === user?.uuid}
+                key={i}
+                // isSentByCurrentUser={message?.sender === user?.uuid}
+              />
+            );
+          })}
           <div ref={messagesEndRef} />
         </section>
-        <section className="flex items-center justify-between border-t border-gray-300 p-4">
-          <input
-            type="text"
-            placeholder="Escribe un mensaje"
-            className="mr-4 w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-gray-400 focus:outline-none"
-            onChange={(e) => setMessages(e.target.value as any)}
-          />
-          {/* <EmojiPicker /> */}
-          <button
-            className="rounded-md bg-[#0078A7] px-4 py-2 text-sm font-medium text-white hover:bg-[#0ebbff] focus:outline-none focus:ring-2 focus:ring-[#0078A7] focus:ring-offset-2"
-            onClick={handleSendMessage}
+        <section>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+              setTextMessage([]);
+            }}
+            className="flex items-center justify-between border-t border-gray-300 p-4"
           >
-            Enviar
-          </button>
+            <input
+              type="text"
+              placeholder="Escribe un mensaje"
+              className="mr-4 w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-gray-400 focus:outline-none"
+              onChange={(e) => setTextMessage(e.target.value as any)}
+              value={textMessage}
+            />
+            {/* <EmojiPicker /> */}
+            <button
+              type="submit"
+              className="rounded-md bg-[#0078A7] px-4 py-2 text-sm font-medium text-white hover:bg-[#0ebbff] focus:outline-none focus:ring-2 focus:ring-[#0078A7] focus:ring-offset-2"
+            >
+              Enviar
+            </button>
+          </form>
         </section>
       </div>
     </>

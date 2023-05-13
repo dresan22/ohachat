@@ -38,6 +38,4 @@ export interface UserStore {
   setToken: (token: UserResponse["token"]) => void;
   setIssuedAt: (issuedAt: UserResponse["issued_at"]) => void;
   setExpiresAt: (expiresAt: UserResponse["expires_at"]) => void;
-  setUpdate: (update: boolean) => void;
-  update: boolean;
 }

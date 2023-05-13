@@ -4,7 +4,6 @@ import { User } from "../types/users";
 export function ProfileChatCard({ user }: { user: User }) {
   const setChatPartner = useChatStore((state) => state.setChatPartner);
   const handleClick = () => {
-    console.log("clicked");
     setChatPartner(user);
   };
   return (
@@ -32,9 +31,6 @@ export function ProfileChatCard({ user }: { user: User }) {
             <span>{user.email}</span>
           </div>
         </div>
-        <time className="ml-auto flex  text-sm text-gray-500">
-          <span>12:00</span>
-        </time>
       </div>
     </button>
   );

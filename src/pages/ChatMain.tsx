@@ -3,17 +3,64 @@ import { ProfileChatCard } from "../components/ProfileChatCard";
 import { ChatRoom } from "../components/ChatRoom";
 import { Welcome } from "../components/Welcome";
 import { useChatStore, useUserStore } from "../store/store";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useAxios from "../utils/client";
 import { AxiosRequestConfig } from "axios";
+import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
+import { BACKEND_WS_BASE, DATA_TYPES } from "../utils/contants";
+import { useToasts } from "react-toast-notifications";
 
 export default function Chat() {
   const navigate = useNavigate();
+  const { addToast } = useToasts();
   const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+  const setToken = useUserStore((state) => state.setToken);
   const chatPartner = useChatStore((state) => state.chatPartner);
   const token = useUserStore((state) => state.token);
+  console.log(`🚀 ~ token:`, token);
   const onlineUsers = useUserStore((state) => state.onlineUsers);
   const setOnlineUsers = useUserStore((state) => state.setOnlineUsers);
+  const messages = useChatStore((state) => state.messages);
+  const setMessages = useChatStore((state) => state.setMessages);
+
+  const { sendMessage, lastMessage, readyState } = useWebSocket(
+    `${BACKEND_WS_BASE}/ws/v1/users/${user?.uuid}/notifications/?token=${token}`,
+    {
+      onOpen: (event) => console.log(event),
+      shouldReconnect: (closeEvent) => true,
+      onMessage: (event) => {
+        const { type, data } = JSON.parse(event.data);
+        console.log(`🚀 ~ data:`, data);
+        if (type === DATA_TYPES.USER_PRESENCE) {
+          if (data.is_online) {
+            setOnlineUsers(response?.data.results);
+
+            addToast(`${data.first_name} is online`, {
+              appearance: "success",
+              autoDismiss: true,
+            });
+          }
+          if (!data.is_online) {
+            setOnlineUsers(response?.data.results);
+            addToast(`${data.first_name} is offline`, {
+              appearance: "error",
+              autoDismiss: true,
+            });
+          }
+        }
+        if (type === DATA_TYPES.NEW_MESSAGE) {
+          if (messages.find((message: any) => message.content === data.content))
+            return;
+          setMessages([
+            ...messages,
+            { content: data.content, sender: data.sender },
+          ]);
+        }
+      },
+      onError: (event) => console.log(event),
+    }
+  );
 
   useEffect(() => {
     if (user === undefined || user === null) {
@@ -22,7 +69,7 @@ export default function Chat() {
   }, [user]);
 
   const allUsersParams: AxiosRequestConfig = {
-    url: "/api/v1/users/",
+    url: "/api/v1/users/?is_online=true",
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -40,6 +87,7 @@ export default function Chat() {
 
   return (
     <div className="n grid h-screen place-content-center bg-oha-pattern bg-cover bg-center text-[#0078A7]">
+      {user?.first_name}
       <div className="flex h-[80vh] min-w-[80vw] overflow-hidden rounded-2xl bg-white shadow-lg">
         <div className=" hidden w-1/3 flex-col rounded-2xl bg-[#F2F2F2] sm:block">
           <div className="ml-5 mt-5 flex items-center">
@@ -78,6 +126,29 @@ export default function Chat() {
         {chatPartner === null && <Welcome />}
         {chatPartner !== null && <ChatRoom />}
       </div>
+      <button
+        onClick={() => {
+          setUser(undefined);
+          setToken(undefined);
+          navigate("/");
+        }}
+        className="absolute bottom-5 right-5"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          className="h-6 w-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+          />
+        </svg>
+      </button>
     </div>
   );
 }

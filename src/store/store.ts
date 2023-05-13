@@ -10,10 +10,8 @@ export const useUserStore = create<UserStore>()(
       issuedAt: null,
       expiresAt: null,
       onlineUsers: [],
-      update: true,
       setUser: (user) => set({ user }),
       setToken: (token) => set({ token }),
-      setUpdate: (update) => set({ update }),
       setIssuedAt: (issuedAt) => set({ issuedAt }),
       setExpiresAt: (expiresAt) => set({ expiresAt }),
       setOnlineUsers: (onlineUsers) => set({ onlineUsers }),
@@ -27,11 +25,19 @@ export const useUserStore = create<UserStore>()(
 interface ChatStore {
   chatPartner: UserStore["user"] | null;
   setChatPartner: (chatPartner: UserStore["user"]) => void;
+  chats: any[];
+  setChats: (chats: any[]) => void;
+  messages: any[];
+  setMessages: (messages: any[]) => void;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
+  messages: [],
+  setMessages: (messages) => set({ messages }),
   chatPartner: null,
   setChatPartner: (chatPartner) => set({ chatPartner }),
+  chats: [],
+  setChats: (chats) => set({ chats }),
 }));
 
 

@@ -2,49 +2,59 @@ import { Link } from "react-router-dom";
 import { Footer } from "../components/Footer";
 import logo from "./../assets/oha-icon.png";
 import loginImage from "./../assets/oha-login.png";
-import { useState } from "react";
-import axios, { AxiosResponse } from "axios";
+import { useEffect, useState } from "react";
+import { AxiosRequestConfig } from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/store";
 import { UserResponse } from "../types";
+import useAxios from "../utils/client";
+import { useToasts } from "react-toast-notifications";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { addToast } = useToasts();
   const setUser = useUserStore((state) => state.setUser);
+  const setToken = useUserStore((state) => state.setToken);
+  const [email, setEmail] = useState<string | undefined>(undefined);
+  const [password, setPassword] = useState<string | undefined>(undefined);
+  const [firstName, setFirstName] = useState<string | undefined>(undefined);
+  const [lastName, setLastName] = useState<string | undefined>(undefined);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<any>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const axiosParams: AxiosRequestConfig = {
+    url: "/api/v1/token/?create=true",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: JSON.stringify({
+      email: email,
+      password: password,
+      first_name: firstName,
+      last_name: lastName,
+    }),
+  };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const { response, sendData } = useAxios(axiosParams);
+
+  const handleClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    fetchData("https://api.chat.oha.services/api/v1/token/?create=true", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: JSON.stringify({
-        email: e.currentTarget.email.value,
-        password: e.currentTarget.password.value,
-        first_name: e.currentTarget.first_name.value,
-        last_name: e.currentTarget.last_name.value,
-      }),
-    }).then(() => {
-      navigate("/chat");
-    });
-  };
-
-  const fetchData = async (url: string, options: any) => {
-    setIsLoading(true);
     try {
-      const response: AxiosResponse<UserResponse> = await axios(url, options);
-      setUser(response.data.user);
-    } catch (error) {
-      setError(error as any);
+      const response = await sendData();
+    } catch (err) {
+      addToast("Error al crear cuenta", {
+        appearance: "error",
+        autoDismiss: true,
+      });
     }
-    setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (response !== undefined) {
+      setUser(response.data.user);
+      setToken(response.data.token);
+      navigate("/chat");
+    }
+  }, [response]);
 
   return (
     <div className="grid h-screen place-content-center bg-slate-500">
@@ -59,7 +69,7 @@ export default function Register() {
             </h2>
             <h1 className="mt-2 text-4xl font-bold">Registrate</h1>
           </header>
-          <form className="mt-3 space-y-6" onSubmit={handleSubmit}>
+          <form className="mt-3 space-y-6">
             <div className="-space-y-px rounded-md ">
               <div>
                 <label htmlFor="name" className="sr-only">
@@ -73,6 +83,7 @@ export default function Register() {
                   required
                   className="relative block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-800 placeholder-slate-500 focus:z-10 focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm"
                   placeholder="Nombre"
+                  onChange={(e) => setFirstName(e.target.value)}
                 />
                 <label htmlFor="name" className="sr-only">
                   Apellido
@@ -85,6 +96,7 @@ export default function Register() {
                   required
                   className="relative mt-2 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-800 placeholder-slate-500 focus:z-10 focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm"
                   placeholder="Apellido"
+                  onChange={(e) => setLastName(e.target.value)}
                 />
 
                 <label htmlFor="email-address" className="sr-only">
@@ -98,6 +110,7 @@ export default function Register() {
                   required
                   className="relative mt-2  block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-800 placeholder-slate-500 focus:z-10 focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm"
                   placeholder="Correo Electrónico"
+                  onChange={(e) => setEmail(e.target.value)}
                 />
 
                 <label htmlFor="password" className="sr-only">
@@ -111,6 +124,7 @@ export default function Register() {
                   required
                   className="relative mt-2 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-800 placeholder-slate-500 focus:z-10 focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm"
                   placeholder="Contraseña"
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 {/* <label htmlFor="password" className="sr-only">
                   Confirmar Contraseña
@@ -127,6 +141,7 @@ export default function Register() {
                 <button
                   type="submit"
                   className="group relative mt-4 flex w-full justify-center rounded-md border border-transparent bg-[#0078A7] px-4 py-2 text-sm font-medium text-white hover:bg-[#0ebbff] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                  onClick={(e) => handleClick(e)}
                 >
                   Registrarse
                 </button>

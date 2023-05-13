@@ -1,12 +1,12 @@
 import React from "react";
 
 interface ChatBubbleProps {
-  text: string;
+  message: { content: string; sender: string };
   isSentByCurrentUser: boolean;
 }
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({
-  text,
+  message,
   isSentByCurrentUser,
 }) => {
   const bubbleColor = isSentByCurrentUser
@@ -19,7 +19,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
       <div
         className={`max-w-xs break-words rounded-lg px-4 py-1 shadow-md ${bubbleColor}`}
       >
-        {text}
+        {message.content}
       </div>
     </div>
   );

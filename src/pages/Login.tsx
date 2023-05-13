@@ -6,16 +6,15 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/store";
 import useAxios from "../utils/client";
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-import { set } from "react-hook-form";
+import { AxiosRequestConfig } from "axios";
+import { useToasts } from "react-toast-notifications";
 
 export function Login() {
   const navigate = useNavigate();
+  const { addToast } = useToasts();
   const setUser = useUserStore((state) => state.setUser);
   const setToken = useUserStore((state) => state.setToken);
   const [errors, setErrors] = useState<any>(undefined);
-  const update = useUserStore((state) => state.update);
-  const setUpdate = useUserStore((state) => state.setUpdate);
 
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [password, setPassword] = useState<string | undefined>(undefined);
@@ -39,11 +38,11 @@ export function Login() {
     if (email !== undefined && password !== undefined) {
       try {
         const response = await sendData();
-        // console.log(`🚀 ~ error:`, error);
-        // console.log(`🚀 ~ response:`, response);
-        setUpdate(!update);
       } catch (err) {
-        console.log("err", err);
+        addToast("Error al iniciar sesión", {
+          appearance: "error",
+          autoDismiss: true,
+        });
       }
     }
   };
@@ -51,6 +50,10 @@ export function Login() {
   useEffect(() => {
     if (error !== undefined) {
       setErrors(error?.response?.data);
+      addToast(`${error?.response?.data?.non_field_errors[0].message}`, {
+        appearance: "error",
+        autoDismiss: true,
+      });
     }
   }, [error]);
 
@@ -139,9 +142,6 @@ export function Login() {
               </div>
             </div>
           </form>
-          {errors !== undefined && (
-            <span>{errors?.non_field_errors[0]?.message}</span>
-          )}
 
           <Footer />
         </div>
