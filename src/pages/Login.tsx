@@ -48,7 +48,7 @@ export function Login() {
 
   useEffect(() => {
     if (error !== undefined) {
-      addToast(`${error?.response?.data?.non_field_errors[0].message as any}`, {
+      addToast(`Error al iniciar sesión`, {
         appearance: "error",
         autoDismiss: true,
       });
