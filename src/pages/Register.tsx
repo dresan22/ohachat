@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { AxiosRequestConfig } from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/store";
-import { UserResponse } from "../types";
 import useAxios from "../utils/client";
 import { useToasts } from "react-toast-notifications";
 
@@ -39,7 +38,7 @@ export default function Register() {
   const handleClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await sendData();
+      await sendData();
     } catch (err) {
       addToast("Error al crear cuenta", {
         appearance: "error",

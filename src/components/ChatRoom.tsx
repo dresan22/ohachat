@@ -7,11 +7,9 @@ import { AxiosRequestConfig } from "axios";
 import { useChatStore, useUserStore } from "../store/store";
 
 export function ChatRoom() {
-  const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const chatPartner = useChatStore((state) => state.chatPartner);
   const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
   const token = useUserStore((state) => state.token);
   const [textMessage, setTextMessage] = useState<any[]>([]);
   const messages = useChatStore((state) => state.messages);
@@ -33,13 +31,9 @@ export function ChatRoom() {
     },
   };
 
-  const { response, sendData, error } = useAxios(sendMessageParams);
+  const { response, sendData } = useAxios(sendMessageParams);
 
   useEffect(() => {
-    const messagesArray = [
-      ...messages,
-      { content: response?.data.content, sender: response?.data.sender },
-    ];
     if (response?.status === 201) {
       setMessages([
         ...messages,

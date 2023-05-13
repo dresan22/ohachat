@@ -23,11 +23,11 @@ export const useUserStore = create<UserStore>()(
 );
 
 interface ChatStore {
+  chats: any[];
+  messages: any[];
   chatPartner: UserStore["user"] | null;
   setChatPartner: (chatPartner: UserStore["user"]) => void;
-  chats: any[];
   setChats: (chats: any[]) => void;
-  messages: any[];
   setMessages: (messages: any[]) => void;
 }
 

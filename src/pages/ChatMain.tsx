@@ -18,20 +18,18 @@ export default function Chat() {
   const setToken = useUserStore((state) => state.setToken);
   const chatPartner = useChatStore((state) => state.chatPartner);
   const token = useUserStore((state) => state.token);
-  console.log(`🚀 ~ token:`, token);
   const onlineUsers = useUserStore((state) => state.onlineUsers);
   const setOnlineUsers = useUserStore((state) => state.setOnlineUsers);
   const messages = useChatStore((state) => state.messages);
   const setMessages = useChatStore((state) => state.setMessages);
 
-  const { sendMessage, lastMessage, readyState } = useWebSocket(
+  useWebSocket(
     `${BACKEND_WS_BASE}/ws/v1/users/${user?.uuid}/notifications/?token=${token}`,
     {
       onOpen: (event) => console.log(event),
-      shouldReconnect: (closeEvent) => true,
+      shouldReconnect: () => true,
       onMessage: (event) => {
         const { type, data } = JSON.parse(event.data);
-        console.log(`🚀 ~ data:`, data);
         if (type === DATA_TYPES.USER_PRESENCE) {
           if (data.is_online) {
             setOnlineUsers(response?.data.results);
@@ -77,7 +75,7 @@ export default function Chat() {
     },
   };
 
-  const { response, sendData, error } = useAxios(allUsersParams);
+  const { response } = useAxios(allUsersParams);
 
   useEffect(() => {
     if (response !== undefined) {

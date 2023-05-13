@@ -37,7 +37,7 @@ export function Login() {
     e.preventDefault();
     if (email !== undefined && password !== undefined) {
       try {
-        const response = await sendData();
+        sendData();
       } catch (err) {
         addToast("Error al iniciar sesión", {
           appearance: "error",
