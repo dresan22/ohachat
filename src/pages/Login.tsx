@@ -14,7 +14,6 @@ export function Login() {
   const { addToast } = useToasts();
   const setUser = useUserStore((state) => state.setUser);
   const setToken = useUserStore((state) => state.setToken);
-  const [errors, setErrors] = useState<any>(undefined);
 
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [password, setPassword] = useState<string | undefined>(undefined);
@@ -49,8 +48,7 @@ export function Login() {
 
   useEffect(() => {
     if (error !== undefined) {
-      setErrors(error?.response?.data);
-      addToast(`${error?.response?.data?.non_field_errors[0].message}`, {
+      addToast(`${error?.response?.data?.non_field_errors[0].message as any}`, {
         appearance: "error",
         autoDismiss: true,
       });

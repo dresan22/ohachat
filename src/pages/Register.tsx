@@ -35,7 +35,7 @@ export default function Register() {
 
   const { response, sendData } = useAxios(axiosParams);
 
-  const handleClick = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
       await sendData();

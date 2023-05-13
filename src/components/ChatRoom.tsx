@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ChatBubble from "./ChatBubble";
-import { useNavigate } from "react-router-dom";
 import useAxios from "../utils/client";
-import useWebSocket from "react-use-websocket";
 import { AxiosRequestConfig } from "axios";
 import { useChatStore, useUserStore } from "../store/store";
 

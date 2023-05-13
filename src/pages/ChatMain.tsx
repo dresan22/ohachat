@@ -127,7 +127,7 @@ export default function Chat() {
       <button
         onClick={() => {
           setUser(undefined);
-          setToken(undefined);
+          setToken(undefined as any);
           navigate("/");
         }}
         className="absolute bottom-5 right-5"
